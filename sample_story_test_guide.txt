@@ -1,0 +1,46 @@
+GOI Y TEST IMPORT CHO 3 MAU TRUYEN
+
+1. sample_story_easy.txt
+- Muc dich: test chapter split co ban, detect ten nhan vat ro rang, event theo chuong.
+- Character ky vong: Lam, Minh, ba Hao, ong Vu, An, ong Phuc.
+- Event ky vong:
+  - Lam den thi tran Van Khe
+  - Lam mo buc thu cua cha
+  - Lam va Minh len doi Sim
+  - Phat hien chiec hop sat va tam anh
+  - Ong Phuc canh bao Lam roi thi tran
+
+2. sample_story_alias.txt
+- Muc dich: test alias / nhieu cach goi 1 nhan vat.
+- Character ky vong:
+  - Ta Linh / Bach Ho / A Linh (co the can merge)
+  - Lao Chu
+  - Ha Nghi
+  - Dinh Mac
+  - Tu Canh
+- Van de de test:
+  - cung mot nhan vat co nhieu ten goi
+  - role relation khong ro rang ngay tu dau
+  - can review thu cong sau detect
+
+3. sample_story_harder.txt
+- Muc dich: test truyện nhiều ten rieng, thong tin bi an, event phuc tap hon.
+- Character ky vong:
+  - Khang
+  - Mai
+  - Huy
+  - bac si Tri / Tran Quoc Tri
+  - Yen
+  - tien si Vu
+- Event ky vong:
+  - Khang nhan tui tai lieu
+  - Mai canh bao Khang
+  - Khang den Vien Khao cuu Dong Hai
+  - Phat hien Du an Lam Thach
+  - Email tiet lo Huy co the chua chet
+  - Yen xuat hien va tiet lo them thong tin
+
+Loi khuyen:
+- Nen import txt truoc vi de parse nhat.
+- Trong MVP, chapter split + detect character candidate + summary draft la du.
+- Alias merge nen la thao tac review thu cong o ban dau.

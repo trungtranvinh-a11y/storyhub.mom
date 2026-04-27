@@ -1,0 +1,359 @@
+STORYHUB TECHNICAL HANDOFF
+Last updated: 2026-04-23
+
+==================================================
+1. CURRENT PRODUCT DIRECTION
+==================================================
+
+Project name:
+- StoryHub
+
+Actual product direction:
+- Text Story Tracking & Analysis Workspace
+
+This is NOT an AI writing workspace anymore.
+
+Current product goal:
+- import story text files
+- parse them into structured data
+- review parsed chapters
+- review character candidates
+- review event drafts
+- track plot threads and timeline
+- use a desktop-style workspace UI
+- run both as web and as desktop app
+
+Out of product scope right now:
+- AI continue writing
+- AI rewrite
+- AI provider workflows
+- collaboration
+- relationship graph
+- OCR pipeline
+
+==================================================
+2. CURRENT STACK
+==================================================
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- PostgreSQL
+- Prisma ORM
+- next-auth credentials auth
+- Electron desktop wrapper
+
+Database currently used:
+- story_workspace_utf8
+
+Why:
+- original DB had WIN1258 encoding and broke Vietnamese text import
+
+Demo account:
+- Email: demo@storyplanner.local
+- Password: password123
+
+==================================================
+3. CURRENT ARCHITECTURE
+==================================================
+
+Main folders:
+- src/app
+- src/modules
+- src/services
+- src/validation
+- src/database
+- prisma
+- electron
+- scripts/desktop
+- StoryHub (Obsidian vault)
+
+Layering:
+- UI -> route handlers / server actions -> services -> Prisma / DB
+
+Important design decisions:
+- service layer is the center
+- project-scoped authorization is enforced
+- parser is heuristic, not AI-driven
+- desktop app wraps the existing web app instead of rewriting the stack
+
+==================================================
+4. IMPORTANT DOMAIN ENTITIES
+==================================================
+
+Still active:
+- User
+- Project
+- Chapter
+- Character
+- Event
+- PlotThread
+- ChapterCharacter
+- EventCharacter
+- StoryNote
+
+Added for import-analysis:
+- ImportJob
+- SourceDocument
+
+Removed from active product direction:
+- AIGenerationLog
+- AI action endpoints
+- AI service
+- context builder service
+
+==================================================
+5. IMPORT PIPELINE
+==================================================
+
+Primary service:
+- src/services/import-service.ts
+
+Pipeline:
+1. create ImportJob
+2. normalize source text
+3. create SourceDocument
+4. split chapters
+5. create Chapter rows
+6. extract character candidates
+7. create/update Character rows
+8. link ChapterCharacter rows
+9. draft Event rows
+10. complete ImportJob
+
+Important parser services:
+- src/services/text-normalizer-service.ts
+- src/services/chapter-split-service.ts
+- src/services/character-candidate-service.ts
+- src/services/event-draft-service.ts
+
+Current parser quality:
+- chapter split is decent
+- event draft extraction is decent for MVP
+- character extraction is still the weakest part
+
+==================================================
+6. IMPORTANT FEATURES ALREADY IMPLEMENTED
+==================================================
+
+Auth and app shell:
+- login/register/logout
+- protected app routes
+- stale session guard after DB switch
+
+Projects:
+- create project
+- list projects
+- update project
+- open project
+
+Imports:
+- upload .txt and .md
+- import jobs page
+- import status and warnings
+- recent source documents
+
+Chapters:
+- parsed chapter list
+- chapter detail review UI
+- review-oriented chapter form
+
+Characters:
+- candidate extraction
+- character list
+- character detail/edit
+- confidence-first sort by mention count
+- alphabetical sort
+- all/candidates/reviewed filters
+- manual character merge flow for alias cleanup
+
+Timeline and plot threads:
+- event list/edit
+- plot thread list/edit
+
+Dashboard:
+- import-aware stats
+- quick actions
+- recent import/chapter/event focus
+
+UI:
+- desktop-style workspace shell
+- app-like sidebar/topbar/panels
+- not designed like a landing-page web app anymore
+
+Desktop app:
+- Electron wrapper exists
+- unpacked Windows app build exists
+
+==================================================
+7. IMPORTANT FUNCTIONS / LOGIC TO KNOW
+==================================================
+
+Import pipeline:
+- runImportPipelineForProject(...)
+- listImportJobsForProject(...)
+
+Character extraction / parser helpers:
+- splitTextIntoChapters(...)
+- extractSentences(...)
+- extractCharacterCandidates(...)
+- normalizeCharacterKey(...)
+- buildEventDraftsFromChapters(...)
+
+Character review/service logic:
+- listCharactersForProject(...)
+- getCharacterForProject(...)
+- mergeCharacterIntoProjectCharacter(...)
+
+Auth/session safety:
+- requireAuthenticatedUser(...)
+- getAuthUserById(...)
+
+Desktop app runtime:
+- electron/main.mjs
+- scripts/desktop/dev.mjs
+- scripts/desktop/prepare.mjs
+
+==================================================
+8. CURRENT UI / UX STATE
+==================================================
+
+Main shell files:
+- src/modules/app-shell/components/app-shell.tsx
+- src/modules/app-shell/components/app-sidebar.tsx
+- src/modules/app-shell/components/app-topbar.tsx
+- src/modules/app-shell/components/workspace-page.tsx
+
+Current direction:
+- feels like an app
+- fixed workspace shell
+- panelized surfaces
+- desktop-first
+
+Shared UI files heavily customized:
+- src/shared/ui/button.tsx
+- src/shared/ui/card.tsx
+- src/shared/ui/input.tsx
+- src/shared/ui/textarea.tsx
+- src/shared/ui/select.tsx
+- src/app/globals.css
+
+==================================================
+9. DESKTOP APP CONVERSION
+==================================================
+
+Current approach:
+- keep Next.js app
+- build standalone output
+- wrap with Electron
+- bundle node.exe into app
+- start internal Next.js server from desktop app
+
+Important files:
+- electron/main.mjs
+- scripts/desktop/dev.mjs
+- scripts/desktop/prepare.mjs
+- next.config.ts
+- package.json
+
+Important commands:
+- npm run desktop:dev
+- npm run desktop:prepare
+- npm run desktop:pack
+- npm run desktop:build
+
+Current verified desktop artifact:
+- dist-desktop/win-unpacked/StoryHub.exe
+
+Important packaging notes:
+- desktop-bundle is generated
+- dist-desktop is generated
+- lint ignores these generated folders
+- packaging currently works for win-unpacked
+- installer verification may still need manual end-to-end confirmation on the target machine
+
+==================================================
+10. CURRENT PARSER EVALUATION SUMMARY
+==================================================
+
+sample_story_easy.txt
+- chapters: 3
+- characters closer to: Lam, Minh, Phuc, Hao
+- events: 6
+- still missing: An, Vu
+
+sample_story_alias.txt
+- chapters: 3
+- characters closer to: Ta Linh, Ha Nghi, Tu Canh, Chu, Mac, Bach Ho
+- alias cleanup is manual via merge
+- still weak on Lao Chu / Dinh Mac full-form handling
+
+sample_story_harder.txt
+- chapters: 4
+- events: 8
+- character extraction improved but still misses or distorts some title-based names
+- still vulnerable to false positives like Hai / Thu depending on regex tuning
+
+Main bottleneck:
+- character extraction quality
+
+==================================================
+11. NEXT PRIORITIES
+==================================================
+
+Highest priority:
+1. improve character extraction again
+2. add source excerpts to character/event drafts
+3. add candidate accept/dismiss review actions
+4. verify desktop runtime on target machine
+
+Parser-specific next work:
+- better title-based name handling
+- better alias phrase handling
+- better single-token false-positive suppression
+
+Review UX next work:
+- confidence labels beyond mention count
+- import detail quality report
+- evidence/source excerpt display
+
+Desktop next work:
+- custom app icon
+- verify installer build end-to-end
+- only consider auto-updater later if really needed
+
+==================================================
+12. IMPORTANT DECISIONS ALREADY MADE
+==================================================
+
+- product moved from AI writing to import/review/tracking
+- AI runtime paths removed
+- reusable CRUD modules kept
+- UTF8 DB adopted
+- parser stays heuristic for MVP
+- alias merge is manual first
+- characters list defaults to confidence-first review
+- Electron chosen as lowest-risk desktop conversion path
+- bundled node.exe used to boot desktop internal server
+- generated desktop folders are excluded from lint
+
+==================================================
+13. SESSION RESUME INSTRUCTIONS
+==================================================
+
+If a future coding session needs context quickly:
+
+Read in this order:
+1. AGENT_CONTEXT.md
+2. StoryHub/00_current_state.md
+3. StoryHub/02_architecture.md
+4. StoryHub/04_parser_eval.md
+5. StoryHub/05_next_steps.md
+6. StoryHub/06_decision_log.md
+7. this file
+
+If continuing product work, assume:
+- product is StoryHub
+- focus is import/review/tracking
+- do not bring back AI writing flows
+- desktop wrapper is part of the current architecture

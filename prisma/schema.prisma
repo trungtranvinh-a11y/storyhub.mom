@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectStatus {
+  PLANNING
+  DRAFT
+  PAUSED
+  COMPLETED
+}
+
+enum ChapterStatus {
+  DRAFT
+  IN_PROGRESS
+  REVIEW
+  FINAL
+}
+
+enum PlotThreadStatus {
+  ACTIVE
+  RESOLVED
+  ARCHIVED
+}
+
+enum ImportJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ImportJobStage {
+  UPLOAD
+  NORMALIZATION
+  CHAPTER_SPLIT
+  CHARACTER_EXTRACTION
+  EVENT_DRAFTING
+  COMPLETE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  projects     Project[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Project {
+  id              String           @id @default(cuid())
+  userId          String
+  title           String
+  genre           String
+  synopsis        String
+  styleNotes      String?
+  targetAudience  String?
+  status          ProjectStatus    @default(PLANNING)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  characters      Character[]
+  chapters        Chapter[]
+  plotThreads     PlotThread[]
+  events          Event[]
+  sourceDocuments SourceDocument[]
+  importJobs      ImportJob[]
+  storyNotes      StoryNote[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([updatedAt])
+}
+
+model Character {
+  id                       String             @id @default(cuid())
+  projectId                String
+  name                     String
+  canonicalName            String?
+  alias                    String?
+  gender                   String?
+  ageFirstAppearance       Int?
+  currentAge               Int?
+  role                     String
+  mentionCount             Int                @default(0)
+  isCandidate              Boolean            @default(false)
+  detectionSource          String?
+  personality              String?
+  appearance               String?
+  occupation               String?
+  goal                     String?
+  fear                     String?
+  secret                   String?
+  status                   String?
+  firstAppearanceChapterId String?
+  notes                    String?
+  project                  Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  firstAppearanceChapter   Chapter?           @relation("FirstAppearanceChapter", fields: [firstAppearanceChapterId], references: [id], onDelete: SetNull)
+  chapters                 ChapterCharacter[]
+  eventLinks               EventCharacter[]
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+
+  @@index([projectId])
+  @@index([firstAppearanceChapterId])
+}
+
+model Chapter {
+  id               String             @id @default(cuid())
+  projectId        String
+  sourceDocumentId String?
+  importJobId      String?
+  title            String
+  sourceHeading    String?
+  orderIndex       Int
+  summary          String?
+  content          String             @default("")
+  status           ChapterStatus      @default(DRAFT)
+  timeInStory      String?
+  parseNotes       String?
+  notes            String?
+  project          Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sourceDocument   SourceDocument?    @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  importJob        ImportJob?         @relation(fields: [importJobId], references: [id], onDelete: SetNull)
+  linkedCharacters ChapterCharacter[]
+  plotThreads      PlotThreadChapter[]
+  events           Event[]
+  firstAppearances Character[]        @relation("FirstAppearanceChapter")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@unique([projectId, orderIndex])
+  @@index([projectId])
+  @@index([sourceDocumentId])
+  @@index([importJobId])
+}
+
+model ChapterCharacter {
+  chapterId   String
+  characterId String
+  chapter     Chapter   @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@id([chapterId, characterId])
+  @@index([characterId])
+}
+
+model PlotThread {
+  id          String             @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  status      PlotThreadStatus   @default(ACTIVE)
+  notes       String?
+  project     Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  chapters    PlotThreadChapter[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model PlotThreadChapter {
+  plotThreadId String
+  chapterId    String
+  plotThread   PlotThread @relation(fields: [plotThreadId], references: [id], onDelete: Cascade)
+  chapter      Chapter    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@id([plotThreadId, chapterId])
+  @@index([chapterId])
+}
+
+model Event {
+  id           String           @id @default(cuid())
+  projectId    String
+  chapterId    String?
+  title        String
+  isDraft      Boolean          @default(false)
+  detectionSource String?
+  description  String?
+  timeMarker   String?
+  consequence  String?
+  notes        String?
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  chapter      Chapter?         @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  characters   EventCharacter[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([projectId])
+  @@index([chapterId])
+}
+
+model SourceDocument {
+  id             String      @id @default(cuid())
+  projectId      String
+  filename       String
+  mimeType       String?
+  rawText        String
+  normalizedText String
+  project        Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  importJobs     ImportJob[]
+  chapters       Chapter[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([projectId])
+  @@index([updatedAt])
+}
+
+model ImportJob {
+  id                      String          @id @default(cuid())
+  projectId               String
+  sourceDocumentId        String?
+  filename                String
+  sourceSizeBytes         Int?
+  status                  ImportJobStatus @default(QUEUED)
+  stage                   ImportJobStage  @default(UPLOAD)
+  errorMessage            String?
+  chapterCount            Int             @default(0)
+  characterCandidateCount Int             @default(0)
+  eventDraftCount         Int             @default(0)
+  project                 Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sourceDocument          SourceDocument? @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  chapters                Chapter[]
+  completedAt             DateTime?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  @@index([projectId])
+  @@index([sourceDocumentId])
+  @@index([status])
+  @@index([updatedAt])
+}
+
+model EventCharacter {
+  eventId      String
+  characterId  String
+  event        Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  character    Character  @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, characterId])
+  @@index([characterId])
+}
+
+model StoryNote {
+  id         String   @id @default(cuid())
+  projectId  String
+  title      String
+  content    String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([projectId])
+}

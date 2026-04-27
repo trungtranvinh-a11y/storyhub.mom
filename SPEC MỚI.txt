@@ -1,0 +1,555 @@
+SPEC MỚI
+Tên tạm thời
+
+Text Story Tracking & Analysis Workspace
+
+1. Định vị sản phẩm mới
+
+Đây là một web app giúp người dùng:
+
+import truyện chữ từ file
+tự động tách chapter ở mức cơ bản
+trích xuất metadata sơ bộ
+quản lý characters / chapters / events / plot threads
+hiển thị dashboard phân tích truyện
+cho phép người dùng sửa lại metadata nếu hệ thống detect chưa chuẩn
+
+Sản phẩm này không còn là AI writing workspace.
+Sản phẩm mới là:
+
+Một workspace để theo dõi, phân tích và quản lý dữ liệu có cấu trúc của truyện chữ sau khi import file.
+
+2. Vì sao đổi hướng này hợp với code cũ
+
+Spec cũ của bạn vốn đã có các lõi sau:
+
+Project
+Character
+Chapter
+PlotThread
+Event / Timeline
+Dashboard
+Auth
+App shell
+Prisma + service layer + REST endpoints
+
+Những phần đó vẫn dùng được gần như nguyên xi nếu ta đổi ngữ nghĩa từ:
+
+“người dùng tự viết truyện”
+
+thành:
+
+“người dùng import truyện chữ để phân tích và tracking”
+
+Tức là bạn không cần đập bỏ toàn bộ, mà chỉ cần pivot domain.
+
+3. Tư duy sản phẩm mới
+Trước đây
+user tạo story project
+user viết chapter
+AI hỗ trợ viết tiếp / rewrite / summarize / suggest next
+Bây giờ
+user tạo analysis project
+user import file truyện chữ
+hệ thống parse file
+hệ thống chia chapter / lưu raw text
+hệ thống detect character candidates / event candidates / metadata draft
+user review và chỉnh sửa
+dashboard hiển thị dữ liệu đã phân tích
+4. Mục tiêu sản phẩm mới
+4.1. Mục tiêu chính
+Giúp người dùng import một bộ truyện chữ và biến nó thành dữ liệu có cấu trúc
+Giúp người dùng theo dõi nhân vật, chapter, timeline và plot threads
+Giúp việc đọc / quản lý / phân tích truyện dài trở nên trực quan hơn
+Không phụ thuộc GPT API để app vẫn usable
+4.2. Mục tiêu MVP
+import được file truyện chữ
+parse được text
+chia chapter ở mức cơ bản
+tạo được character candidates
+tạo được summary / event draft theo rule hoặc metadata import
+hiển thị dashboard
+cho phép sửa dữ liệu thủ công
+5. Scope MVP mới
+In scope
+Auth cơ bản
+Project management
+File import
+Text extraction / parsing
+Chapter generation từ file import
+Character management
+Plot thread management
+Timeline / event management
+Dashboard overview
+Import job tracking
+Manual review / manual correction
+Out of scope
+AI writing
+rewrite text
+continue chapter
+suggest next chapter
+MyGPT integration tự động trong app
+OCR cho ảnh / truyện tranh
+relationship graph nâng cao
+map / locations trực quan
+collaboration
+publishing
+6. Mô hình sản phẩm mới
+6.1. Project
+
+Giữ lại gần như cũ, nhưng đổi ý nghĩa.
+
+Project giờ là:
+
+Một bộ truyện hoặc một đơn vị phân tích truyện.
+
+Fields gợi ý
+title
+genre
+synopsis
+sourceType
+originalAuthor optional
+language optional
+status
+createdAt
+updatedAt
+
+sourceType có thể là:
+
+uploaded_text
+epub
+docx
+pdf_text
+manual
+6.2. ImportJob
+
+Đây là module mới quan trọng nhất.
+
+Mục tiêu
+
+Theo dõi từng lần user import file vào project.
+
+Fields
+id
+projectId
+fileName
+fileType
+fileSize
+importStatus
+parseStatus
+chapterSplitStatus
+characterExtractStatus
+eventExtractStatus
+errorMessage optional
+createdAt
+updatedAt
+status gợi ý
+uploaded
+parsing
+parsed
+failed
+reviewed
+6.3. SourceDocument
+
+Lưu text gốc sau khi import.
+
+Fields
+id
+projectId
+importJobId
+originalFileName
+contentRaw
+contentNormalized
+pageCount optional
+wordCount
+createdAt
+updatedAt
+6.4. Chapter
+
+Giữ lại entity cũ, nhưng đổi nghĩa từ “chapter do user viết” thành “chapter được parse từ file”.
+
+Fields nên có
+id
+projectId
+sourceDocumentId optional
+title
+orderIndex
+summary optional
+content
+chapterLabel optional
+wordCount optional
+parseConfidence optional
+reviewStatus
+createdAt
+updatedAt
+reviewStatus
+auto_generated
+reviewed
+edited
+6.5. Character
+
+Giữ lại gần như cũ, nhưng bỏ những field quá gắn với chuyện sáng tác nếu cần.
+
+Fields
+id
+projectId
+name
+aliases optional
+role optional
+description optional
+firstAppearanceChapterId optional
+appearanceCount optional
+confidenceScore optional
+status optional
+notes optional
+createdAt
+updatedAt
+Ghi chú
+
+ageFirstAppearance không còn là field bắt buộc.
+Vì trong truyện import vào, ta chưa chắc suy ra tuổi chính xác.
+
+6.6. CharacterMention
+
+Entity mới để nối giữa character và chapter.
+
+Fields
+id
+characterId
+chapterId
+mentionCount
+extractedName
+confidenceScore
+createdAt
+
+Cái này rất hữu ích cho dashboard.
+
+6.7. Event
+
+Giữ lại concept cũ, nhưng bây giờ event là kết quả phân tích.
+
+Fields
+id
+projectId
+chapterId optional
+title
+description
+eventType optional
+orderIndex optional
+consequence optional
+confidenceScore optional
+reviewStatus
+createdAt
+updatedAt
+6.8. PlotThread
+
+Giữ lại, vì nó vẫn rất hợp để tracking diễn biến dài hơi.
+Spec cũ đã có concept này và rất đáng giữ.
+
+Fields
+id
+projectId
+title
+description
+status
+relatedChapters
+relatedCharacters
+notes
+createdAt
+updatedAt
+6.9. AnalysisNote
+
+Thay cho StoryNote thiên về sáng tác.
+
+Fields
+id
+projectId
+type
+title
+content
+createdAt
+updatedAt
+type
+import_note
+reviewer_note
+interpretation
+unresolved_issue
+manual_summary
+7. Chức năng chính của MVP mới
+7.1. Tạo project
+
+User tạo project mới để chứa một truyện hoặc một nguồn truyện.
+
+7.2. Import file
+
+User upload:
+
+txt
+docx
+epub
+pdf có text selectable
+7.3. Parse nội dung
+
+Hệ thống:
+
+lấy text ra
+normalize text
+lưu raw text và normalized text
+ghi ImportJob status
+7.4. Tách chapter
+
+Dùng heuristic để detect:
+
+“Chương 1”
+“Chapter 1”
+“Hồi 1”
+pattern heading
+hoặc fallback chia section nếu không rõ
+7.5. Detect character candidates
+
+Hệ thống tạo danh sách tên ứng viên dựa trên:
+
+proper noun candidates
+tần suất xuất hiện
+chapter đầu xuất hiện
+số chapter có mặt
+7.6. Tạo metadata draft
+
+Hệ thống tạo:
+
+chapter summaries sơ bộ
+event draft sơ bộ
+plot thread draft optional sau MVP nhẹ
+7.7. Manual review
+
+User sửa lại:
+
+chapter title
+summary
+character names
+gộp alias
+event description
+7.8. Dashboard
+
+Dashboard hiển thị:
+
+tổng số chapter
+tổng số character
+số event
+số import jobs
+chapter gần đây
+nhân vật xuất hiện nhiều nhất
+file nào chưa review
+8. File import pipeline
+
+Đây là chỗ quan trọng nhất của tactic mới.
+
+Bước 1: Upload
+
+User upload file truyện.
+
+Bước 2: Parse
+
+System đọc file và chuyển sang text.
+
+Bước 3: Normalize
+
+Làm sạch:
+
+khoảng trắng
+xuống dòng
+ký tự rác
+tiêu đề lặp
+encoding bất thường
+Bước 4: Chapter split
+
+System cố gắng tìm chapter boundaries.
+
+Bước 5: Candidate extraction
+
+System trích xuất:
+
+possible character names
+chapter summaries draft
+event draft
+Bước 6: Persist
+
+Lưu:
+
+SourceDocument
+Chapters
+Character candidates
+Events draft
+ImportJob logs
+Bước 7: Review
+
+User chỉnh lại metadata đã detect.
+
+9. UI / UX mới
+
+Spec cũ có app shell, dashboard, chapters, characters, timeline, plot threads rất hợp để giữ lại. Phần cần thay là chapter editor và AI action bar.
+
+Sidebar mới
+Dashboard
+Library / Imports
+Chapters
+Characters
+Timeline
+Plot Threads
+Notes
+Settings
+Pages mới
+Projects page
+
+Danh sách các project truyện.
+
+Project dashboard
+
+Tổng quan dữ liệu đã import.
+
+Imports page
+
+Danh sách import jobs, trạng thái parse, lỗi.
+
+Chapters page
+
+Danh sách chapter được parse ra.
+
+Chapter detail page
+
+Xem chapter content, summary, characters xuất hiện, events liên quan.
+
+Characters page
+
+Danh sách nhân vật detect được.
+
+Character detail page
+
+Thông tin nhân vật + chapter xuất hiện.
+
+Timeline page
+
+Danh sách events theo thứ tự.
+
+Plot threads page
+
+Theo dõi các tuyến nội dung do user tạo / chỉnh lại.
+
+Settings page
+
+Thông tin project, nguồn file, cấu hình parser cơ bản.
+
+10. Những gì giữ lại từ spec cũ
+
+Dựa trên hai file cũ, những phần sau nên giữ càng nhiều càng tốt: auth, routes dạng project-scoped, Prisma relational model, các service ProjectService, CharacterService, ChapterService, PlotThreadService, EventService, DashboardService, cấu trúc AppLayout, Sidebar, TopBar, list/detail pages, và nguyên tắc “dữ liệu có cấu trúc là trung tâm”.
+
+Giữ lại gần như nguyên vẹn
+Auth
+Project CRUD
+Character CRUD
+Chapter CRUD
+PlotThread CRUD
+Event CRUD
+Dashboard
+Protected routes
+User-scoped data
+Error/loading/empty states
+Sửa lại
+Chapter editor → Chapter viewer/reviewer
+Story notes → Analysis notes
+Dashboard cards → thêm import stats
+Chapter service → hỗ trợ parse/import origin
+Character service → thêm merge alias / mention count
+Bỏ khỏi MVP
+AIService
+ContextBuilderService
+AI endpoints
+AI action buttons
+AIGenerationLog
+Continue/Rewrite/Summarize/Suggest-next flows
+11. API mới đề xuất
+Auth
+
+Giữ nguyên:
+
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+GET /api/auth/me
+Projects
+
+Giữ gần như cũ:
+
+GET /api/projects
+POST /api/projects
+GET /api/projects/:projectId
+PATCH /api/projects/:projectId
+DELETE /api/projects/:projectId
+Imports
+GET /api/projects/:projectId/imports
+POST /api/projects/:projectId/imports
+GET /api/projects/:projectId/imports/:importJobId
+POST /api/projects/:projectId/imports/:importJobId/parse
+POST /api/projects/:projectId/imports/:importJobId/reprocess
+Source documents
+GET /api/projects/:projectId/documents
+GET /api/projects/:projectId/documents/:documentId
+Chapters
+GET /api/projects/:projectId/chapters
+GET /api/projects/:projectId/chapters/:chapterId
+PATCH /api/projects/:projectId/chapters/:chapterId
+Characters
+GET /api/projects/:projectId/characters
+POST /api/projects/:projectId/characters
+GET /api/projects/:projectId/characters/:characterId
+PATCH /api/projects/:projectId/characters/:characterId
+DELETE /api/projects/:projectId/characters/:characterId
+POST /api/projects/:projectId/characters/merge
+Events
+GET /api/projects/:projectId/events
+POST /api/projects/:projectId/events
+PATCH /api/projects/:projectId/events/:eventId
+DELETE /api/projects/:projectId/events/:eventId
+Plot threads
+GET /api/projects/:projectId/plot-threads
+POST /api/projects/:projectId/plot-threads
+PATCH /api/projects/:projectId/plot-threads/:plotThreadId
+DELETE /api/projects/:projectId/plot-threads/:plotThreadId
+Dashboard
+GET /api/projects/:projectId/dashboard
+12. MVP acceptance criteria mới
+
+Một user mới phải làm được các việc sau:
+
+tạo project
+upload file truyện chữ
+hệ thống parse được text
+hệ thống tạo chapter records cơ bản
+hệ thống detect được character candidates sơ bộ
+user sửa lại chapter / character / event metadata
+dashboard hiển thị dữ liệu tổng quan
+
+Nếu làm được trọn flow này thì MVP mới đạt.
+
+13. Rủi ro kỹ thuật cần chốt sớm
+13.1. Định dạng file
+
+TXT dễ nhất.
+DOCX/EPUB/PDF-text nên hỗ trợ sau hoặc hỗ trợ nhưng tách parser riêng.
+
+13.2. Chia chapter không chuẩn
+
+Không phải truyện nào cũng có heading rõ.
+Cần có fallback và manual review.
+
+13.3. Detect tên nhân vật sai
+
+Phải thiết kế UI review để sửa:
+
+merge alias
+xóa false positives
+đổi role thủ công
+13.4. Event extraction quá “ảo”
+
+Đừng hứa tự hiểu plot quá sâu ở MVP.
+Chỉ nên làm event draft nhẹ hoặc cho user tạo event thủ công.

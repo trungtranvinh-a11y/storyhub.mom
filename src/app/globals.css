@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+:root {
+  --color-background: #dfe7ef;
+  --color-paper: #f8fbff;
+  --color-ink: #16202c;
+  --color-ink-strong: #0d141d;
+  --color-muted: #617082;
+  --color-line: rgba(77, 100, 125, 0.16);
+  --color-accent: #2f7f72;
+  --color-accent-soft: #cfe8e2;
+  --color-accent-strong: #225d53;
+  --color-surface: rgba(248, 251, 255, 0.78);
+  --shadow-soft: 0 28px 80px -42px rgba(28, 46, 68, 0.34);
+  --shadow-panel: 0 18px 38px -24px rgba(31, 53, 78, 0.24);
+}
+
+@theme inline {
+  --font-sans: var(--font-manrope);
+  --font-serif: var(--font-cormorant);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.88), transparent 28%),
+    radial-gradient(circle at top right, rgba(164, 201, 222, 0.46), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(170, 218, 204, 0.42), transparent 22%),
+    linear-gradient(135deg, #ebf1f7 0%, #e2ebf4 52%, #d9e4ef 100%);
+  color: var(--color-ink);
+  font-family: var(--font-manrope), sans-serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(circle at center, black 36%, transparent 80%);
+  pointer-events: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(47, 127, 114, 0.22);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(248, 251, 255, 0.55);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: rgba(55, 91, 126, 0.4);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(55, 91, 126, 0.6);
+  background-clip: padding-box;
+}

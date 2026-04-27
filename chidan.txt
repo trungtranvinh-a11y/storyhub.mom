@@ -1,0 +1,1321 @@
+Dưới đây là một bản **spec mô tả sản phẩm + MVP** được viết theo hướng để **một AI chuyên code hoặc một dev khác đọc vào là hiểu hệ thống cần làm gì**, mục tiêu là giảm mơ hồ, thống nhất phạm vi, và tránh lạc hướng khi bắt đầu triển khai.
+
+---
+
+# SPEC SẢN PHẨM
+
+## Tên tạm thời
+
+**AI Story Planner & Writing Workspace**
+
+---
+
+# 1. Tổng quan sản phẩm
+
+## 1.1. Mô tả ngắn
+
+Đây là một web app hỗ trợ người dùng **lên ý tưởng, quản lý và viết truyện** với sự hỗ trợ của AI. Sản phẩm không chỉ là nơi để AI sinh ra nội dung truyện, mà còn là một **workspace quản trị cốt truyện**, giúp người dùng theo dõi:
+
+* nhân vật
+* mối quan hệ giữa các nhân vật
+* timeline sự kiện
+* địa điểm / thế giới truyện
+* các tuyến cốt truyện đang mở
+* trạng thái hiện tại của câu chuyện
+* các ghi chú logic để AI viết nhất quán hơn
+
+Mục tiêu chính là giúp người dùng, đặc biệt là **người mới tập viết truyện**, có thể viết truyện dài mà không bị:
+
+* quên nhân vật
+* quên tình tiết cũ
+* sai timeline
+* mất kiểm soát quan hệ giữa các nhân vật
+* để AI viết lệch logic so với truyện đã có
+
+---
+
+## 1.2. Định vị sản phẩm
+
+Sản phẩm này nên được định vị là:
+
+> **Nền tảng hỗ trợ sáng tác truyện có AI và hệ quản trị trí nhớ của truyện**
+
+Không định vị đơn thuần là “AI viết truyện”.
+
+---
+
+# 2. Mục tiêu sản phẩm
+
+## 2.1. Mục tiêu chính
+
+* Giúp người dùng tạo và quản lý một bộ truyện theo cách trực quan, rõ ràng
+* Giúp AI sinh nội dung dựa trên bối cảnh truyện đã được định nghĩa sẵn
+* Giúp người viết không bị lẫn thông tin giữa các chương
+* Giúp người mới có thể viết truyện dễ hơn bằng cách có khung quản lý truyện rõ ràng
+
+## 2.2. Mục tiêu trải nghiệm
+
+Người dùng khi dùng sản phẩm phải cảm thấy:
+
+* dễ bắt đầu
+* không bị ngợp
+* truyện của mình có “bộ nhớ”
+* AI hiểu truyện của mình
+* có thể xem toàn bộ truyện ở nhiều góc nhìn khác nhau, không chỉ là dạng text
+
+---
+
+# 3. Đối tượng người dùng
+
+## 3.1. Đối tượng chính
+
+* Người mới tập viết truyện
+* Người viết truyện dài kỳ
+* Người viết fantasy, sci-fi, trinh thám, ngôn tình, huyền huyễn, tiên hiệp, v.v.
+* Người muốn dùng AI để hỗ trợ viết nhưng vẫn muốn kiểm soát nội dung
+
+## 3.2. Vấn đề họ đang gặp
+
+* Không biết bắt đầu từ đâu
+* Viết vài chương là quên tình tiết cũ
+* Quên nhân vật phụ
+* Quan hệ nhân vật bị lệch
+* Timeline bị sai
+* AI viết không bám truyện cũ
+* Không có nơi quản lý tổng thể cả truyện
+
+---
+
+# 4. Giá trị cốt lõi của sản phẩm
+
+Sản phẩm phải giải quyết được 4 giá trị chính:
+
+## 4.1. Viết
+
+Cho phép người dùng viết truyện và dùng AI để hỗ trợ viết.
+
+## 4.2. Nhớ
+
+Hệ thống phải lưu được toàn bộ dữ liệu nền của truyện để cả user và AI đều có thể sử dụng lại.
+
+## 4.3. Quản lý
+
+Cho phép người dùng quản lý nhân vật, timeline, quan hệ, địa điểm, tuyến truyện.
+
+## 4.4. Giữ logic
+
+Hệ thống phải hỗ trợ phát hiện và giảm lỗi continuity, lỗi logic, lỗi xung đột dữ liệu.
+
+---
+
+# 5. Phạm vi chức năng tổng thể
+
+Sản phẩm gồm các module chính sau:
+
+1. **Project Management**
+2. **Story Editor**
+3. **Character Management**
+4. **Relationship Management**
+5. **Timeline / Event Management**
+6. **Plot Thread Management**
+7. **Location / Map Management**
+8. **Story Bible**
+9. **AI Writing Assistant**
+10. **Continuity / Consistency Support**
+11. **Dashboard & Overview**
+
+---
+
+# 6. Mô tả chi tiết từng module
+
+---
+
+## 6.1. Project Management
+
+### Mục tiêu
+
+Cho phép người dùng tạo và quản lý một bộ truyện như một project độc lập.
+
+### Mỗi project cần có:
+
+* title
+* genre
+* short synopsis
+* writing style / tone notes
+* target audience (optional)
+* status: draft / ongoing / completed
+* createdAt / updatedAt
+
+### Chức năng
+
+* Tạo project mới
+* Đổi tên project
+* Cập nhật thông tin cơ bản
+* Mở project để tiếp tục làm việc
+* Hiển thị danh sách project của user
+
+---
+
+## 6.2. Story Editor
+
+### Mục tiêu
+
+Là nơi user trực tiếp viết nội dung truyện.
+
+### Chức năng chính
+
+* Tạo chapter mới
+* Sửa chapter
+* Lưu nội dung chapter
+* Hiển thị danh sách chapter theo thứ tự
+* Gắn metadata cho chapter:
+
+  * title
+  * order
+  * summary
+  * trạng thái
+  * thời gian trong truyện
+  * địa điểm chính
+  * nhân vật chính trong chapter
+* Dùng AI để:
+
+  * viết tiếp
+  * viết lại
+  * mở rộng đoạn
+  * tóm tắt chapter
+  * gợi ý diễn biến tiếp theo
+
+### Ghi chú thiết kế
+
+Story editor là khu vực trung tâm của sản phẩm. Khi user đang viết chapter, hệ thống cần hiển thị bối cảnh liên quan để hỗ trợ viết.
+
+---
+
+## 6.3. Character Management
+
+### Mục tiêu
+
+Cho phép user định nghĩa nhân vật từ đầu để truyện có bộ nhớ ổn định.
+
+### Mỗi nhân vật cần có các field:
+
+#### Bắt buộc
+
+* name
+* ageFirstAppearance
+* role
+
+#### Khuyến nghị
+
+* alias
+* gender
+* currentAge
+* personality
+* appearance
+* occupation / identity
+* goal
+* fear / weakness
+* secret
+* status
+* firstAppearanceChapter
+* notes
+
+### Vai trò của role
+
+Field role có thể dùng tập giá trị như:
+
+* protagonist
+* deuteragonist
+* antagonist
+* supporting
+* mentor
+* side character
+* comic relief
+* other
+
+### Chức năng
+
+* Tạo nhân vật
+* Chỉnh sửa nhân vật
+* Xem danh sách nhân vật
+* Xem chi tiết hồ sơ nhân vật
+* Gắn nhân vật vào chapter / event / relationship
+* Theo dõi lần xuất hiện đầu tiên và trạng thái hiện tại
+
+### Ghi chú
+
+AI phải ưu tiên sử dụng dữ liệu character profile khi generate nội dung mới.
+
+---
+
+## 6.4. Relationship Management
+
+### Mục tiêu
+
+Giúp user nhìn được quan hệ giữa các nhân vật và sự thay đổi của quan hệ đó theo truyện.
+
+### Mỗi relationship cần có:
+
+* characterA
+* characterB
+* relationType
+* description
+* currentState
+* notes
+
+### relationType ví dụ:
+
+* family
+* friend
+* lover
+* enemy
+* mentor-student
+* ally
+* rival
+* hidden connection
+* betrayal
+* unknown
+
+### currentState ví dụ:
+
+* stable
+* tense
+* broken
+* improving
+* unresolved
+
+### Chức năng
+
+* Tạo quan hệ giữa 2 nhân vật
+* Chỉnh sửa quan hệ
+* Xem danh sách quan hệ
+* Có thể hiển thị dạng list trước, graph sau
+* Gắn relation vào các event lớn nếu cần
+
+---
+
+## 6.5. Timeline / Event Management
+
+### Mục tiêu
+
+Giúp người dùng theo dõi diễn biến câu chuyện theo thời gian và tránh sai logic thời gian.
+
+### Mỗi event cần có:
+
+* title
+* description
+* timeMarker
+* chapterReference
+* involvedCharacters
+* locationReference
+* consequence
+* notes
+
+### timeMarker có thể là:
+
+* ngày/tháng/năm cụ thể trong thế giới truyện
+* mốc tương đối như “Ngày 1”, “Tuần 3”, “Mùa đông năm thứ 2”
+* hoặc thứ tự event nếu truyện chưa có lịch cụ thể
+
+### Chức năng
+
+* Tạo event
+* Chỉnh sửa event
+* Xem danh sách event
+* Hiển thị theo timeline
+* Liên kết event với chapter, nhân vật, location
+
+### Ghi chú
+
+Timeline phải đủ linh hoạt cho cả truyện hiện đại và fantasy.
+
+---
+
+## 6.6. Plot Thread Management
+
+### Mục tiêu
+
+Giúp user theo dõi các tuyến nội dung đang mở, tránh quên mất mystery hoặc conflict.
+
+### Mỗi plot thread cần có:
+
+* title
+* description
+* status
+* relatedCharacters
+* relatedChapters
+* notes
+
+### status ví dụ:
+
+* planned
+* introduced
+* active
+* paused
+* resolved
+* abandoned
+
+### Chức năng
+
+* Tạo plot thread
+* Chỉnh sửa plot thread
+* Gắn plot thread với chapter
+* Xem trạng thái các tuyến cốt truyện
+* Tìm các plot đang mở mà lâu chưa được xử lý
+
+---
+
+## 6.7. Location / Map Management
+
+### Mục tiêu
+
+Giúp quản lý các địa điểm trong truyện và liên kết chúng với sự kiện, nhân vật, chapter.
+
+### Mỗi location cần có:
+
+* name
+* description
+* region / parent area
+* type
+* notes
+* relatedCharacters
+* relatedEvents
+
+### type ví dụ:
+
+* city
+* village
+* kingdom
+* building
+* room
+* forest
+* battlefield
+* school
+* other
+
+### Chức năng
+
+* Tạo location
+* Chỉnh sửa location
+* Xem danh sách location
+* Xem các chapter / event từng xảy ra ở location đó
+
+### Ghi chú
+
+Bản đầu không cần map drag-drop phức tạp. Chỉ cần location management và mô tả có cấu trúc.
+
+---
+
+## 6.8. Story Bible
+
+### Mục tiêu
+
+Đây là nơi chứa toàn bộ dữ liệu nền của truyện và là nguồn chính để AI dùng làm context.
+
+### Story Bible bao gồm:
+
+* character profiles
+* relationships
+* locations
+* world rules / lore
+* project synopsis
+* chapter summaries
+* timeline summary
+* plot thread summaries
+* author notes
+
+### Chức năng
+
+* Gom dữ liệu từ nhiều module
+* Hiển thị dưới dạng hệ thống tài liệu của project
+* Là nguồn dữ liệu chuẩn cho AI khi generate
+
+### Yêu cầu quan trọng
+
+Story Bible phải được xem như “single source of truth” ở mức sản phẩm.
+
+---
+
+## 6.9. AI Writing Assistant
+
+### Mục tiêu
+
+AI hỗ trợ viết, không thay thế hoàn toàn việc kiểm soát truyện của user.
+
+### Các mode AI nên có
+
+* Continue writing
+* Rewrite selected text
+* Expand short idea into scene
+* Summarize chapter
+* Suggest next chapter / next scene
+* Generate based on outline
+* Improve dialogue
+* Improve emotional tone
+* Check continuity / consistency
+
+### Input AI cần lấy từ đâu
+
+AI không nên nhận ngữ cảnh một cách tùy tiện. Cần có cơ chế lấy context từ:
+
+* current chapter
+* project synopsis
+* relevant character profiles
+* relevant location profile
+* recent chapter summaries
+* open plot threads liên quan
+* story notes của user
+
+### Output AI cần được kiểm soát
+
+* AI output không tự ghi đè vĩnh viễn nếu user chưa xác nhận
+* AI output nên có thể insert vào editor hoặc preview trước
+
+---
+
+## 6.10. Continuity / Consistency Support
+
+### Mục tiêu
+
+Hỗ trợ phát hiện sai logic truyện.
+
+### Loại lỗi cần phát hiện ở mức cơ bản
+
+* Nhân vật đã chết nhưng vẫn xuất hiện bình thường
+* Tuổi nhân vật không khớp timeline
+* Quan hệ nhân vật mâu thuẫn với dữ liệu đã lưu
+* Địa điểm không khớp với event / chapter
+* Vật thể hoặc tình tiết xuất hiện mà chưa từng được giới thiệu
+* Chapter summary mâu thuẫn với chapter trước
+
+### Bản MVP
+
+Chỉ cần cảnh báo ở mức nhẹ, ví dụ:
+
+* “Nhân vật A đang ở trạng thái mất tích nhưng xuất hiện trong chapter này”
+* “Tuổi hiện tại có thể không khớp với timeline”
+* “Plot thread X đã 10 chapter chưa được cập nhật”
+
+---
+
+## 6.11. Dashboard & Overview
+
+### Mục tiêu
+
+Cho user cái nhìn tổng quan về project.
+
+### Dashboard nên hiển thị:
+
+* project title
+* genre
+* số chapter
+* số nhân vật
+* số plot thread đang active
+* chapter gần nhất
+* các cảnh báo continuity cơ bản
+* quick actions:
+
+  * tạo chapter
+  * tạo nhân vật
+  * hỏi AI gợi ý bước tiếp theo
+
+---
+
+# 7. Yêu cầu về trải nghiệm người dùng
+
+## 7.1. Nguyên tắc UX
+
+* Dễ bắt đầu với người mới
+* Các module phải liên kết với nhau
+* Không bắt user phải nhập quá nhiều ngay từ đầu
+* Có thể bắt đầu từ ít thông tin rồi bổ sung dần
+* Khi đang viết, user phải nhìn thấy bối cảnh liên quan ngay
+
+## 7.2. Onboarding
+
+Khi tạo project mới, hệ thống có thể hỏi:
+
+* thể loại
+* ý tưởng ngắn
+* nhân vật chính
+* tông truyện
+* muốn AI hỗ trợ dạng nào
+
+Có thể dùng dữ liệu đó để tạo khung project ban đầu.
+
+---
+
+# 8. Cấu trúc giao diện web
+
+---
+
+## 8.1. Layout tổng thể
+
+Ứng dụng nên có bố cục workspace 3 vùng:
+
+### Top bar
+
+* tên project
+* search
+* nút AI assistant
+* avatar / menu user
+
+### Sidebar trái
+
+* Dashboard
+* Chapters
+* Characters
+* Relationships
+* Timeline
+* Locations
+* Plot Threads
+* Story Bible
+* Settings
+
+### Main area
+
+Khu làm việc chính, thay đổi theo page hiện tại.
+
+### Right panel
+
+Panel ngữ cảnh nhanh, ví dụ:
+
+* nhân vật liên quan
+* timeline hiện tại
+* plot đang mở
+* AI suggestions
+* warnings
+
+---
+
+## 8.2. Màn hình chính cần có
+
+### Dashboard page
+
+Tổng quan project.
+
+### Chapters page
+
+Danh sách chapter + tạo/sửa chapter.
+
+### Chapter editor page
+
+Nơi viết truyện chính.
+
+### Characters page
+
+Danh sách nhân vật + hồ sơ chi tiết.
+
+### Relationships page
+
+Danh sách quan hệ.
+
+### Timeline page
+
+Danh sách / timeline view các event.
+
+### Locations page
+
+Quản lý địa điểm.
+
+### Plot Threads page
+
+Theo dõi các tuyến cốt truyện.
+
+### Story Bible page
+
+Xem dữ liệu nền tổng hợp.
+
+---
+
+# 9. Luồng sử dụng tiêu chuẩn
+
+## 9.1. Luồng cơ bản
+
+1. User tạo project mới
+2. User nhập thông tin ý tưởng cơ bản
+3. User tạo nhân vật đầu tiên
+4. User tạo vài địa điểm và ghi chú nếu muốn
+5. User tạo chapter 1
+6. User viết hoặc nhờ AI generate
+7. Sau khi lưu chapter, hệ thống tạo summary
+8. User cập nhật timeline / plot thread nếu cần
+9. Các chapter sau tiếp tục dùng context từ dữ liệu trước đó
+
+## 9.2. Luồng lý tưởng có AI hỗ trợ
+
+1. User nhập ý tưởng ngắn
+2. AI gợi ý synopsis, nhân vật, outline ban đầu
+3. User chỉnh lại
+4. User bắt đầu viết chapter
+5. AI hỗ trợ viết tiếp dựa trên Story Bible
+6. Hệ thống tự gợi ý update timeline / plot thread / warning
+
+---
+
+# 10. Mô hình dữ liệu đề xuất
+
+Dưới đây là mô hình dữ liệu ở mức logic. Tên field có thể điều chỉnh khi code.
+
+---
+
+## 10.1. Project
+
+```ts
+Project {
+  id: string
+  userId: string
+  title: string
+  genre: string
+  synopsis: string
+  styleNotes?: string
+  targetAudience?: string
+  status: 'draft' | 'ongoing' | 'completed'
+  createdAt: datetime
+  updatedAt: datetime
+}
+```
+
+---
+
+## 10.2. Character
+
+```ts
+Character {
+  id: string
+  projectId: string
+  name: string
+  alias?: string
+  gender?: string
+  ageFirstAppearance: number
+  currentAge?: number
+  role: string
+  personality?: string
+  appearance?: string
+  occupation?: string
+  goal?: string
+  fear?: string
+  secret?: string
+  status?: string
+  firstAppearanceChapterId?: string
+  notes?: string
+  createdAt: datetime
+  updatedAt: datetime
+}
+```
+
+---
+
+## 10.3. Relationship
+
+```ts
+Relationship {
+  id: string
+  projectId: string
+  characterAId: string
+  characterBId: string
+  relationType: string
+  currentState?: string
+  description?: string
+  notes?: string
+  createdAt: datetime
+  updatedAt: datetime
+}
+```
+
+---
+
+## 10.4. Chapter
+
+```ts
+Chapter {
+  id: string
+  projectId: string
+  title: string
+  orderIndex: number
+  summary?: string
+  content: string
+  status: 'draft' | 'completed'
+  timeInStory?: string
+  mainLocationId?: string
+  notes?: string
+  createdAt: datetime
+  updatedAt: datetime
+}
+```
+
+---
+
+## 10.5. ChapterCharacter
+
+```ts
+ChapterCharacter {
+  id: string
+  chapterId: string
+  characterId: string
+}
+```
+
+---
+
+## 10.6. Location
+
+```ts
+Location {
+  id: string
+  projectId: string
+  name: string
+  description?: string
+  region?: string
+  type?: string
+  notes?: string
+  createdAt: datetime
+  updatedAt: datetime
+}
+```
+
+---
+
+## 10.7. PlotThread
+
+```ts
+PlotThread {
+  id: string
+  projectId: string
+  title: string
+  description?: string
+  status: 'planned' | 'introduced' | 'active' | 'paused' | 'resolved' | 'abandoned'
+  notes?: string
+  createdAt: datetime
+  updatedAt: datetime
+}
+```
+
+---
+
+## 10.8. PlotThreadChapter
+
+```ts
+PlotThreadChapter {
+  id: string
+  plotThreadId: string
+  chapterId: string
+}
+```
+
+---
+
+## 10.9. Event
+
+```ts
+Event {
+  id: string
+  projectId: string
+  title: string
+  description?: string
+  timeMarker?: string
+  chapterId?: string
+  locationId?: string
+  consequence?: string
+  notes?: string
+  createdAt: datetime
+  updatedAt: datetime
+}
+```
+
+---
+
+## 10.10. EventCharacter
+
+```ts
+EventCharacter {
+  id: string
+  eventId: string
+  characterId: string
+}
+```
+
+---
+
+## 10.11. StoryNote
+
+```ts
+StoryNote {
+  id: string
+  projectId: string
+  type: 'world_rule' | 'author_note' | 'style_note' | 'lore'
+  title: string
+  content: string
+  createdAt: datetime
+  updatedAt: datetime
+}
+```
+
+---
+
+## 10.12. AI Generation Log
+
+```ts
+AIGenerationLog {
+  id: string
+  projectId: string
+  chapterId?: string
+  actionType: 'continue' | 'rewrite' | 'expand' | 'summarize' | 'suggest_next' | 'consistency_check'
+  promptSnapshot: string
+  contextSnapshot: string
+  outputText: string
+  createdAt: datetime
+}
+```
+
+---
+
+# 11. Quy tắc liên kết dữ liệu
+
+Đây là phần rất quan trọng để AI coder không hiểu sai.
+
+## 11.1. Character là entity gốc
+
+Mọi thứ liên quan đến nhân vật phải tham chiếu về Character.
+
+## 11.2. Chapter là đơn vị viết chính
+
+Chapter là nơi chứa nội dung truyện đầy đủ.
+
+## 11.3. Event là đơn vị timeline
+
+Timeline không nên chỉ suy luận từ chapter; nên có bảng Event riêng để quản lý thời gian rõ hơn.
+
+## 11.4. PlotThread là đơn vị quản lý mạch truyện
+
+Một chapter có thể thuộc nhiều plot thread.
+
+## 11.5. Story Bible là lớp tổng hợp
+
+Story Bible không nhất thiết là một bảng riêng duy nhất; có thể là tập hợp dữ liệu được render từ nhiều bảng.
+
+---
+
+# 12. Hành vi AI cần được định nghĩa rõ
+
+## 12.1. AI không được hoạt động “mù”
+
+Mỗi lần generate, AI cần được truyền đủ context tối thiểu.
+
+## 12.2. Context ưu tiên
+
+Thứ tự ưu tiên context khi generate chapter:
+
+1. Project synopsis
+2. Current chapter context
+3. 3–5 chapter summaries gần nhất
+4. Character profiles liên quan
+5. Location liên quan
+6. Plot threads đang active liên quan
+7. Author notes / style notes
+
+## 12.3. AI output không tự commit
+
+AI chỉ đề xuất nội dung. User phải là người xác nhận chèn vào editor hoặc lưu thay đổi.
+
+## 12.4. AI phải tách action
+
+Các action AI cần tách biệt rõ ở backend/service layer:
+
+* continueChapter
+* rewriteSelection
+* expandIdea
+* summarizeChapter
+* suggestNextScene
+* consistencyCheck
+
+Không nên gom tất cả thành một endpoint mơ hồ.
+
+---
+
+# 13. Các trường hợp sử dụng chính
+
+## 13.1. Tạo truyện mới
+
+User tạo project và nhập ý tưởng ban đầu.
+
+## 13.2. Tạo nhân vật
+
+User thêm nhân vật với tên, tuổi xuất hiện đầu tiên, role, và các mô tả mở rộng.
+
+## 13.3. Viết chapter
+
+User viết bằng tay hoặc dùng AI hỗ trợ.
+
+## 13.4. Cập nhật timeline
+
+User hoặc AI chuyển thông tin chapter thành event timeline.
+
+## 13.5. Theo dõi tuyến truyện
+
+User cập nhật plot thread để không bỏ quên.
+
+## 13.6. Kiểm tra logic
+
+AI hoặc hệ thống đưa ra cảnh báo consistency.
+
+---
+
+# 14. Ngoài phạm vi của bản đầu
+
+Để tránh AI coder làm lan man, những thứ sau **không bắt buộc ở bản đầu**:
+
+* cộng tác nhiều người real-time
+* comment theo từng đoạn
+* map trực quan kéo thả
+* graph relationship bằng force layout phức tạp
+* xuất bản EPUB/PDF chuyên sâu
+* AI tự động viết cả truyện dài không cần user kiểm soát
+* analytics nâng cao về nhịp truyện
+* mobile app native
+
+---
+
+# 15. SPEC MVP
+
+Phần này là phiên bản cô đọng để một AI coder hiểu **chính xác cần build gì trước**.
+
+---
+
+## 15.1. Mục tiêu của MVP
+
+Xây một phiên bản web có thể:
+
+1. tạo project truyện
+2. quản lý nhân vật cơ bản
+3. quản lý chapter
+4. viết và lưu chapter
+5. dùng AI để hỗ trợ sinh nội dung
+6. quản lý plot thread cơ bản
+7. quản lý timeline cơ bản
+8. hiển thị dashboard tổng quan
+9. giúp AI viết bám vào dữ liệu project
+
+MVP chưa cần đẹp quá, nhưng phải có cấu trúc đúng.
+
+---
+
+## 15.2. Tính năng bắt buộc trong MVP
+
+### A. Project
+
+* Tạo project
+* Danh sách project
+* Xem và sửa thông tin project cơ bản
+
+### B. Character
+
+* Tạo character
+* Sửa character
+* Xóa character
+* Danh sách character
+* Detail character
+
+Field tối thiểu:
+
+* name
+* ageFirstAppearance
+* role
+* personality (optional)
+* notes (optional)
+
+### C. Chapter
+
+* Tạo chapter
+* Sửa chapter
+* Lưu chapter
+* Danh sách chapter theo thứ tự
+* Summary cho chapter
+* Gắn chapter với nhân vật liên quan
+
+### D. AI Writing
+
+* Continue writing
+* Rewrite selected text
+* Summarize chapter
+* Suggest next chapter idea
+
+### E. Plot Thread
+
+* Tạo plot thread
+* Sửa trạng thái plot thread
+* Link plot thread với chapter
+
+### F. Timeline
+
+* Tạo event
+* Sửa event
+* Danh sách event theo thứ tự thời gian
+* Link event với chapter và nhân vật
+
+### G. Dashboard
+
+Hiển thị:
+
+* số chapter
+* số character
+* số plot thread active
+* chapter mới nhất
+* event mới nhất
+
+---
+
+## 15.3. Những gì MVP chưa cần
+
+* map trực quan
+* relationship graph trực quan
+* scene-level editor
+* continuity checker phức tạp
+* advanced lore system
+* team collaboration
+* version compare
+* publishing tools
+
+---
+
+## 15.4. UI tối thiểu của MVP
+
+### Sidebar
+
+* Dashboard
+* Chapters
+* Characters
+* Timeline
+* Plot Threads
+* Settings
+
+### Main pages
+
+#### Dashboard
+
+Tóm tắt project
+
+#### Chapters
+
+List chapter + button tạo chapter
+
+#### Chapter Editor
+
+Editor + AI action buttons
+
+#### Characters
+
+List character + form tạo/sửa
+
+#### Timeline
+
+List event
+
+#### Plot Threads
+
+List plot thread
+
+---
+
+## 15.5. User flow MVP
+
+### Flow 1: tạo truyện mới
+
+1. User bấm create project
+2. Nhập title, genre, synopsis
+3. Vào dashboard project
+
+### Flow 2: thêm nhân vật
+
+1. Vào Characters
+2. Bấm create
+3. Nhập name, ageFirstAppearance, role
+4. Lưu
+
+### Flow 3: viết chapter
+
+1. Vào Chapters
+2. Tạo chapter mới
+3. Nhập title
+4. Viết content
+5. Bấm AI continue / summarize nếu muốn
+6. Lưu chapter
+
+### Flow 4: theo dõi plot
+
+1. Tạo plot thread
+2. Link plot thread với chapter
+3. Cập nhật status khi truyện tiến triển
+
+### Flow 5: theo dõi timeline
+
+1. Tạo event từ chapter
+2. Gán nhân vật liên quan
+3. Gắn timeMarker
+
+---
+
+# 16. Acceptance criteria cho MVP
+
+Đây là phần nên có để AI coder không mơ hồ.
+
+## 16.1. Project
+
+* User tạo được project và nhìn thấy trong danh sách
+* User mở lại project cũ được
+
+## 16.2. Character
+
+* User tạo được nhân vật với 3 field chính: name, ageFirstAppearance, role
+* Character lưu đúng và hiển thị lại được
+* User sửa/xóa được character
+
+## 16.3. Chapter
+
+* User tạo được chapter
+* Nội dung chapter lưu và load lại đúng
+* Chapter có title và content
+* Có summary field
+
+## 16.4. AI
+
+* User có thể bấm nút để AI viết tiếp chapter
+* AI output hiển thị dưới dạng preview hoặc insert option
+* User có thể dùng AI để tóm tắt chapter
+
+## 16.5. Plot Thread
+
+* User tạo được plot thread
+* User thay đổi được trạng thái plot thread
+* User link được plot thread với chapter
+
+## 16.6. Timeline
+
+* User tạo được event
+* User gắn event với chapter
+* Danh sách event hiển thị theo thứ tự
+
+## 16.7. Dashboard
+
+* Dashboard hiển thị đúng số lượng entity
+* Hiển thị chapter gần nhất
+
+---
+
+# 17. Kiến trúc triển khai gợi ý
+
+Phần này không ép công nghệ cụ thể, nhưng định hướng cấu trúc.
+
+## 17.1. Frontend
+
+Nên theo dạng SPA hoặc app-router web app với các khu vực:
+
+* dashboard
+* resource list pages
+* detail/edit pages
+* editor page
+
+## 17.2. Backend
+
+Nên tách các service:
+
+* project service
+* character service
+* chapter service
+* timeline service
+* plot thread service
+* AI service
+
+## 17.3. AI layer
+
+Nên tách riêng logic:
+
+* buildContextForGeneration
+* buildContextForSummary
+* buildContextForSuggestion
+* parseAIOutputIfNeeded
+
+## 17.4. Database
+
+Nên dùng relational model vì entity liên kết nhau khá rõ.
+
+---
+
+# 18. Các rủi ro cần lưu ý khi code
+
+## 18.1. Rủi ro lớn nhất
+
+Xây app thành “text editor có AI” mà thiếu data structure.
+Điều này sẽ làm mất giá trị cốt lõi của sản phẩm.
+
+## 18.2. Rủi ro thứ hai
+
+Cho AI generate mà không có context pipeline rõ ràng.
+Kết quả sẽ là AI viết không nhất quán.
+
+## 18.3. Rủi ro thứ ba
+
+Form quá dài, khiến user mới bỏ cuộc.
+Nên chia basic info và advanced info.
+
+## 18.4. Rủi ro thứ tư
+
+Ôm quá nhiều tính năng ở MVP.
+Cần giữ đúng scope.
+
+---
+
+# 19. Định nghĩa sản phẩm thành một câu để đội code luôn nhớ
+
+> Đây là một web app giúp người dùng viết truyện với AI, đồng thời quản lý toàn bộ nhân vật, timeline, mối quan hệ và tuyến cốt truyện để đảm bảo câu chuyện dễ theo dõi, dễ phát triển và nhất quán theo thời gian.
+
+---
+
+# 20. Chỉ dẫn ngắn cho AI coder
+
+Nếu giao cho một AI chuyên code, phần định hướng có thể ghi như sau:
+
+## Nhiệm vụ cần hoàn thành
+
+Hãy xây một web app MVP cho việc viết truyện có AI hỗ trợ, với các module cốt lõi:
+
+* project
+* characters
+* chapters
+* plot threads
+* timeline
+* dashboard
+* AI writing actions
+
+## Nguyên tắc bắt buộc
+
+* Dữ liệu phải có cấu trúc rõ ràng
+* Character, Chapter, PlotThread, Event là các entity riêng
+* AI phải dùng context từ dữ liệu project
+* UI theo kiểu workspace
+* MVP ưu tiên chức năng hơn hiệu ứng
+* Không build các tính năng ngoài phạm vi MVP
+
+## Kết quả mong muốn
+
+Một người dùng mới có thể:
+
+1. tạo project truyện
+2. thêm nhân vật
+3. tạo chapter
+4. nhờ AI viết tiếp
+5. tạo timeline event
+6. tạo plot thread
+7. xem dashboard tổng quan
+
+Nếu làm được trọn luồng trên thì MVP đạt mục tiêu.
+
+---
+
+Nếu bạn muốn, ở tin nhắn tiếp theo mình sẽ viết tiếp cho bạn **một bản “technical handoff spec” sát code hơn nữa**, gồm:
+
+* sitemap
+* API routes
+* database schema SQL/Prisma mẫu
+* component tree cho frontend
+* luồng AI context cụ thể theo từng action
